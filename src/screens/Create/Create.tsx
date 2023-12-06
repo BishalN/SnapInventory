@@ -46,9 +46,16 @@ export function Example() {
 		formState: { errors },
 	} = useForm<CreateProductType>({
 		resolver: zodResolver(CreateProductSchema),
+		defaultValues: {
+			name: '',
+			description: '',
+			price: 0,
+			quantity: 0,
+			barcode: '',
+			category: '',
+			type: 'product',
+		},
 	});
-
-	console.log(errors);
 
 	const [state] = useState<CreateProductInput>({
 		name: '',
@@ -202,6 +209,7 @@ export function Example() {
 									onChangeText={onChange}
 									value={String(value)}
 									placeholder="product price"
+									keyboardType="numeric"
 								/>
 							</Input>
 							<FormControlError>
@@ -239,6 +247,7 @@ export function Example() {
 									onChangeText={onChange}
 									value={String(value)}
 									placeholder="Stock quantity"
+									keyboardType="numeric"
 								/>
 							</Input>
 							<FormControlError>
