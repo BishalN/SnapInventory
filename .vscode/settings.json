@@ -1,0 +1,7 @@
+{
+  "i18n-ally.localesPaths": [
+    "ios/Pods/Flipper-Boost-iOSX/boost/locale",
+    "ios/Pods/Flipper-Folly/folly/lang",
+    "ios/Pods/Flipper-Boost-iOSX/boost/predef/language"
+  ]
+}
