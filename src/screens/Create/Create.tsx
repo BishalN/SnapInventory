@@ -22,10 +22,35 @@ import {
 } from '@gluestack-ui/themed';
 import uuid from 'react-native-uuid';
 import { useState } from 'react';
+import { z } from 'zod';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 
-function Example() {
+export const CreateProductSchema = z.object({
+	name: z.string().min(3),
+	description: z.string().min(20),
+	price: z.number().min(0),
+	quantity: z.number().min(0),
+	barcode: z.string().min(0),
+	category: z.string().min(0),
+	type: z.string().min(0),
+});
+
+type CreateProductType = z.infer<typeof CreateProductSchema>;
+
+export function Example() {
 	const toast = useToast();
-	const [state, setState] = useState<CreateProductInput>({
+	const {
+		control,
+		handleSubmit,
+		formState: { errors },
+	} = useForm<CreateProductType>({
+		resolver: zodResolver(CreateProductSchema),
+	});
+
+	console.log(errors);
+
+	const [state] = useState<CreateProductInput>({
 		name: '',
 		description: '',
 		price: 0,
@@ -39,7 +64,7 @@ function Example() {
 		_id: '',
 	});
 
-	const handleSubmit = async () => {
+	const handleCreateProduct = async () => {
 		const res = await createProduct({
 			...state,
 			createdAt: new Date().toISOString(),
@@ -54,127 +79,187 @@ function Example() {
 			),
 		});
 	};
+
+	const onSubmit = (data: CreateProductType) => {
+		console.log('on Submit', data);
+		handleCreateProduct()
+			.then(() => {
+				console.log(data);
+			})
+			.catch(err => {
+				console.log(err);
+			});
+	};
+
 	return (
 		<View padding="$4">
 			{/* <Heading size="md">General Information</Heading>
 			<Divider /> */}
 			<VStack mt="$2" space="md">
-				<FormControl
-					size="md"
-					isDisabled={false}
-					isInvalid={false}
-					isReadOnly={false}
-					isRequired={false}
+				<Controller
+					control={control}
+					rules={{
+						required: true,
+					}}
+					render={({ field: { onChange, onBlur, value } }) => (
+						<FormControl
+							size="md"
+							isDisabled={false}
+							isInvalid={errors.name ? true : false}
+							isReadOnly={false}
+							isRequired={false}
+						>
+							<FormControlLabel mb="$1">
+								<FormControlLabelText>Name</FormControlLabelText>
+							</FormControlLabel>
+							<Input>
+								<InputField
+									onBlur={onBlur}
+									onChangeText={onChange}
+									value={value}
+									placeholder="product name"
+								/>
+							</Input>
+							<FormControlHelper>
+								<FormControlHelperText>
+									Must be at least 3 characters.
+								</FormControlHelperText>
+							</FormControlHelper>
+							<FormControlError>
+								<FormControlErrorIcon as={AlertCircleIcon} />
+								{errors.name && (
+									<FormControlErrorText>
+										{errors.name.message}
+									</FormControlErrorText>
+								)}
+							</FormControlError>
+						</FormControl>
+					)}
+					name="name"
+				/>
+
+				<Controller
+					control={control}
+					rules={{
+						required: true,
+					}}
+					render={({ field: { onChange, onBlur, value } }) => (
+						<FormControl
+							size="md"
+							isDisabled={false}
+							isInvalid={errors.description ? true : false}
+							isReadOnly={false}
+							isRequired={false}
+						>
+							<FormControlLabel mb="$1">
+								<FormControlLabelText>Description</FormControlLabelText>
+							</FormControlLabel>
+							<Textarea>
+								<TextareaInput
+									onBlur={onBlur}
+									onChangeText={onChange}
+									value={value}
+									placeholder="product descripton"
+								/>
+							</Textarea>
+							<FormControlHelper>
+								<FormControlHelperText>
+									Write a short description for your product.
+								</FormControlHelperText>
+							</FormControlHelper>
+							<FormControlError>
+								<FormControlErrorIcon as={AlertCircleIcon} />
+								{errors.description && (
+									<FormControlErrorText>
+										{errors.description.message}
+									</FormControlErrorText>
+								)}
+							</FormControlError>
+						</FormControl>
+					)}
+					name="description"
+				/>
+
+				<Controller
+					control={control}
+					rules={{
+						required: true,
+					}}
+					render={({ field: { onChange, onBlur, value } }) => (
+						<FormControl
+							size="md"
+							isDisabled={false}
+							isInvalid={errors.price ? true : false}
+							isReadOnly={false}
+							isRequired={false}
+						>
+							<FormControlLabel mb="$1">
+								<FormControlLabelText>Price</FormControlLabelText>
+							</FormControlLabel>
+							<Input>
+								<InputField
+									onBlur={onBlur}
+									onChangeText={onChange}
+									value={String(value)}
+									placeholder="product price"
+								/>
+							</Input>
+							<FormControlError>
+								<FormControlErrorIcon as={AlertCircleIcon} />
+								{errors.price && (
+									<FormControlErrorText>
+										{errors.price.message}
+									</FormControlErrorText>
+								)}
+							</FormControlError>
+						</FormControl>
+					)}
+					name="price"
+				/>
+
+				<Controller
+					control={control}
+					rules={{
+						required: true,
+					}}
+					render={({ field: { onChange, onBlur, value } }) => (
+						<FormControl
+							size="md"
+							isDisabled={false}
+							isInvalid={errors.quantity ? true : false}
+							isReadOnly={false}
+							isRequired={false}
+						>
+							<FormControlLabel mb="$1">
+								<FormControlLabelText>Stock Quanitity</FormControlLabelText>
+							</FormControlLabel>
+							<Input>
+								<InputField
+									onBlur={onBlur}
+									onChangeText={onChange}
+									value={String(value)}
+									placeholder="Stock quantity"
+								/>
+							</Input>
+							<FormControlError>
+								<FormControlErrorIcon as={AlertCircleIcon} />
+								{errors.quantity && (
+									<FormControlErrorText>
+										{errors.quantity.message}
+									</FormControlErrorText>
+								)}
+							</FormControlError>
+						</FormControl>
+					)}
+					name="quantity"
+				/>
+
+				<Button
+					onPress={handleSubmit(onSubmit)}
+					width="$32"
+					size="sm"
+					variant="solid"
 				>
-					<FormControlLabel mb="$1">
-						<FormControlLabelText>Name</FormControlLabelText>
-					</FormControlLabel>
-					<Input>
-						<InputField
-							value={state.name}
-							onChangeText={name => setState({ ...state, name })}
-							placeholder="product name"
-						/>
-					</Input>
-					<FormControlHelper>
-						<FormControlHelperText>
-							Must be at least 3 characters.
-						</FormControlHelperText>
-					</FormControlHelper>
-					<FormControlError>
-						<FormControlErrorIcon as={AlertCircleIcon} />
-						<FormControlErrorText>
-							At least 3 characters are required.
-						</FormControlErrorText>
-					</FormControlError>
-				</FormControl>
-
-				<FormControl
-					size="md"
-					isDisabled={false}
-					isInvalid={false}
-					isReadOnly={false}
-					isRequired={false}
-				>
-					<FormControlLabel mb="$1">
-						<FormControlLabelText>Description</FormControlLabelText>
-					</FormControlLabel>
-					<Textarea>
-						<TextareaInput
-							value={state.description}
-							onChangeText={description => setState({ ...state, description })}
-							placeholder="product descripton"
-						/>
-					</Textarea>
-					<FormControlHelper>
-						<FormControlHelperText>
-							Write a short description for your product.
-						</FormControlHelperText>
-					</FormControlHelper>
-					<FormControlError>
-						<FormControlErrorIcon as={AlertCircleIcon} />
-						<FormControlErrorText>
-							At least 20 characters are required.
-						</FormControlErrorText>
-					</FormControlError>
-				</FormControl>
-
-				<FormControl
-					size="md"
-					isDisabled={false}
-					isInvalid={false}
-					isReadOnly={false}
-					isRequired={false}
-				>
-					<FormControlLabel mb="$1">
-						<FormControlLabelText>Price</FormControlLabelText>
-					</FormControlLabel>
-					<Input>
-						<InputField
-							value={state.price.toString()}
-							onChangeText={price =>
-								setState({ ...state, price: Number(price) })
-							}
-							placeholder="product price"
-						/>
-					</Input>
-					<FormControlError>
-						<FormControlErrorIcon as={AlertCircleIcon} />
-						<FormControlErrorText>
-							At least 3 characters are required.
-						</FormControlErrorText>
-					</FormControlError>
-				</FormControl>
-
-				<FormControl
-					size="md"
-					isDisabled={false}
-					isInvalid={false}
-					isReadOnly={false}
-					isRequired={false}
-				>
-					<FormControlLabel mb="$1">
-						<FormControlLabelText>Stock Quantity</FormControlLabelText>
-					</FormControlLabel>
-					<Input>
-						<InputField
-							value={state.quantity.toString()}
-							onChangeText={quantity =>
-								setState({ ...state, quantity: Number(quantity) })
-							}
-							placeholder="Stock quantity"
-						/>
-					</Input>
-
-					<FormControlError>
-						<FormControlErrorIcon as={AlertCircleIcon} />
-						<FormControlErrorText>
-							At least 3 characters are required.
-						</FormControlErrorText>
-					</FormControlError>
-				</FormControl>
-
-				<Button onPress={handleSubmit} width="$32" size="sm" variant="solid">
 					<ButtonText>Submit</ButtonText>
 				</Button>
 			</VStack>
