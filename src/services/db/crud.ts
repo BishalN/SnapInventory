@@ -53,8 +53,6 @@ export const getAllProducts = async () => {
 	try {
 		const response = await db.allDocs<Product>({
 			include_docs: true,
-			startkey: 'product_',
-			endkey: 'product_\uffff',
 		});
 		console.log('Products retrieved successfully:', response);
 		return response;
