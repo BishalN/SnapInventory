@@ -2077,6 +2077,11 @@
     mkdirp "^1.0.4"
     rimraf "^3.0.2"
 
+"@pushpendersingh/react-native-scanner@^1.0.2":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@pushpendersingh/react-native-scanner/-/react-native-scanner-1.0.2.tgz#f97b689b8d7155fdf05b8f00ed9531f559ee270d"
+  integrity sha512-/i30pqbr0I0Ew377on7vSbZSzsgSrFcbhLiqhP+ibXbdMBjk+1ax70lm9uAFRAkFuc1TJkWjYma5scaUXAYBzw==
+
 "@react-aria/checkbox@^3.2.1":
   version "3.12.0"
   resolved "https://registry.yarnpkg.com/@react-aria/checkbox/-/checkbox-3.12.0.tgz#a965e975975404ecf1ff867284511e4490a69c21"
@@ -8377,6 +8382,11 @@ react-native-uuid@^2.0.1:
   resolved "https://registry.yarnpkg.com/react-native-uuid/-/react-native-uuid-2.0.1.tgz#ed4e2dfb1683eddb66967eb5dca140dfe1abddb9"
   integrity sha512-cptnoIbL53GTCrWlb/+jrDC6tvb7ypIyzbXNJcpR3Vab0mkeaaVd5qnB3f0whXYzS+SMoSQLcUUB0gEWqkPC0g==
 
+react-native-vision-camera@^3.6.13:
+  version "3.6.13"
+  resolved "https://registry.yarnpkg.com/react-native-vision-camera/-/react-native-vision-camera-3.6.13.tgz#165455fe93332f785cf6a9b7ee76a041aca5ffb9"
+  integrity sha512-sr8zCKQmkVM7Mo5ZJAwBGe81xiZcvekThSOv/g0QXR5eE5SOxOq7UDCBFzcgrPa3kSpPEqtfa45iQ9Sd/kSKXg==
+
 react-native@^0.72.7:
   version "0.72.7"
   resolved "https://registry.yarnpkg.com/react-native/-/react-native-0.72.7.tgz#5bf5b6e6a7ff2239e1d634ddc17c71d5a31927db"
@@ -9551,6 +9561,11 @@ vary@~1.1.2:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/vary/-/vary-1.1.2.tgz#2299f02c6ded30d4a5961b0b9f74524a18f634fc"
   integrity sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==
+
+vision-camera-code-scanner@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/vision-camera-code-scanner/-/vision-camera-code-scanner-0.2.0.tgz#8adc0694319a17f6a95f6dfacc02ab7ac29b4742"
+  integrity sha512-H5hVkXfbIcGdg9YlhuS8Y/xDX5e32Vo6eK5FyDQsE9AGVjlqEHMmSLHZg7BX8UUm4ADmiAZc8wzc4n8TUqGr0g==
 
 vlq@^1.0.0:
   version "1.0.1"

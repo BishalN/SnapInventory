@@ -11,6 +11,7 @@ export interface Product {
 	barcode: string;
 	createdAt: string;
 	updatedAt: string;
+	images?: string[];
 }
 
 export interface Supplier {

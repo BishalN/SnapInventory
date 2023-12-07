@@ -20,12 +20,20 @@ import {
 	FormControlLabel,
 	FormControlLabelText,
 	View,
+	Image,
+	Box,
 } from '@gluestack-ui/themed';
 import uuid from 'react-native-uuid';
 import { z } from 'zod';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ApplicationTabScreenProps } from '@/types/navigation';
+import { launchImageLibrary } from 'react-native-image-picker';
+import { Camera, useCameraDevices } from 'react-native-vision-camera';
+import { useScanBarcodes, BarcodeFormat } from 'vision-camera-code-scanner';
+import { StyleSheet } from 'react-native';
+
+import { useState, useEffect } from 'react';
 
 export const CreateProductSchema = z.object({
 	name: z.string().min(3),
@@ -46,6 +54,23 @@ export type CreateProductType = z.infer<typeof CreateProductSchema>;
 
 export function Create({ navigation }: ApplicationTabScreenProps) {
 	const toast = useToast();
+
+	const [images, setImages] = useState([]);
+
+	const [hasPermission, setHasPermission] = useState(false);
+	const devices = useCameraDevices();
+	const device = devices.back;
+
+	const [frameProcessor, barcodes] = useScanBarcodes([BarcodeFormat.QR_CODE], {
+		checkInverted: true,
+	});
+
+	useEffect(() => {
+		void (async () => {
+			const status = await Camera.requestCameraPermission();
+			setHasPermission(status === 'granted');
+		})();
+	}, []);
 
 	const {
 		control,
@@ -86,6 +111,7 @@ export function Create({ navigation }: ApplicationTabScreenProps) {
 			createdAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
 			_id: uuid.v4() as string,
+			images: images,
 		};
 		const res = await createProduct(product);
 
@@ -108,6 +134,16 @@ export function Create({ navigation }: ApplicationTabScreenProps) {
 			.catch(err => {
 				console.log(err);
 			});
+	};
+
+	const handleImageAttachment = async () => {
+		console.log('handle image attachment');
+		const result = await launchImageLibrary({
+			mediaType: 'photo',
+			quality: 1,
+			selectionLimit: 3,
+		});
+		setImages(result.assets.map(asset => asset.uri));
 	};
 
 	return (
@@ -328,6 +364,54 @@ export function Create({ navigation }: ApplicationTabScreenProps) {
 					)}
 					name="supplierContact"
 				/>
+
+				{images.length > 0 && (
+					<Box>
+						{images.map(image => (
+							<Image
+								key={image}
+								size="md"
+								alt="product image"
+								source={{
+									uri: image,
+								}}
+							/>
+						))}
+					</Box>
+				)}
+
+				<Button
+					onPress={handleImageAttachment}
+					width="$32"
+					size="sm"
+					variant="solid"
+				>
+					<ButtonText>Upload Image</ButtonText>
+				</Button>
+
+				<Button
+					onPress={handleImageAttachment}
+					width="$32"
+					size="sm"
+					variant="solid"
+				>
+					<ButtonText>Add Barcode</ButtonText>
+				</Button>
+
+				{device != null && hasPermission && (
+					<>
+						<Camera
+							style={StyleSheet.absoluteFill}
+							device={device}
+							isActive={true}
+							frameProcessor={frameProcessor}
+							frameProcessorFps={5}
+						/>
+						{barcodes.map((barcode, idx) => (
+							<Text key={idx}>{barcode.displayValue}</Text>
+						))}
+					</>
+				)}
 
 				<Button
 					onPress={handleSubmit(onSubmit)}

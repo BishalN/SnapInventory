@@ -18,6 +18,7 @@
     "@gluestack-ui/config": "^1.0.6",
     "@gluestack-ui/themed": "^1.0.22",
     "@hookform/resolvers": "^3.3.2",
+    "@pushpendersingh/react-native-scanner": "^1.0.2",
     "@react-native-masked-view/masked-view": "^0.3.0",
     "@react-navigation/bottom-tabs": "^6.5.11",
     "@react-navigation/native": "^6.1.9",
@@ -49,6 +50,8 @@
     "react-native-screens": "^3.27.0",
     "react-native-svg": "13.8.0",
     "react-native-uuid": "^2.0.1",
+    "react-native-vision-camera": "^3.6.13",
+    "vision-camera-code-scanner": "^0.2.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {
