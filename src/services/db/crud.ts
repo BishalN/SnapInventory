@@ -1,6 +1,7 @@
 import { localDb as db } from './singleton';
 import { Product } from './models';
 
+export type ProductDoc = PouchDB.Core.ExistingDocument<Product>;
 export type CreateProductInput = Omit<Product, '_rev'>;
 
 export const createProduct = async (product: CreateProductInput) => {

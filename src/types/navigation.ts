@@ -10,5 +10,15 @@ export type ApplicationStackParamList = {
 	'Update Supplier': { supplierId: string };
 };
 
+export type ApplicationTabParamList = {
+	Home: undefined;
+	Create: undefined;
+	Update: { productId: string };
+	Reports: undefined;
+};
+
 export type ApplicationScreenProps =
 	StackScreenProps<ApplicationStackParamList>;
+
+export type ApplicationTabScreenProps =
+	StackScreenProps<ApplicationTabParamList>;

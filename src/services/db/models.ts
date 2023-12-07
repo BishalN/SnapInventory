@@ -1,5 +1,3 @@
-// we need to use the types from pouchdb here
-
 export interface Product {
 	_id: PouchDB.Core.DocumentId;
 	_rev: PouchDB.Core.RevisionId;
@@ -8,7 +6,7 @@ export interface Product {
 	description: string;
 	price: number;
 	quantity: number;
-	supplierId: string; // Reference to the supplier document
+	supplier: Supplier;
 	category: string;
 	barcode: string;
 	createdAt: string;
@@ -16,13 +14,9 @@ export interface Product {
 }
 
 export interface Supplier {
-	_id: PouchDB.Core.DocumentId;
-	_rev: PouchDB.Core.RevisionId;
 	type: string;
 	name: string;
 	contact: string;
-	createdAt: string;
-	updatedAt: string;
 }
 
 export interface StockTransaction {

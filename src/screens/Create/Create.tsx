@@ -7,9 +7,9 @@ import {
 	Textarea,
 	TextareaInput,
 	VStack,
-	useToast,
-	View,
 	Text,
+	useToast,
+	ScrollView,
 	AlertCircleIcon,
 	FormControl,
 	FormControlError,
@@ -19,27 +19,34 @@ import {
 	FormControlHelperText,
 	FormControlLabel,
 	FormControlLabelText,
+	View,
 } from '@gluestack-ui/themed';
 import uuid from 'react-native-uuid';
-import { useState } from 'react';
 import { z } from 'zod';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { ApplicationTabScreenProps } from '@/types/navigation';
 
 export const CreateProductSchema = z.object({
 	name: z.string().min(3),
 	description: z.string().min(20),
-	price: z.number().min(0),
-	quantity: z.number().min(0),
+	price: z.string().transform(value => Number(value)),
+	quantity: z.string().transform(value => Number(value)),
 	barcode: z.string().min(0),
 	category: z.string().min(0),
 	type: z.string().min(0),
+	supplierName: z.string().min(3),
+	supplierContact: z.string().min(0),
+	createdAt: z.string().min(0),
+	updatedAt: z.string().min(0),
+	_id: z.string().min(0),
 });
 
-type CreateProductType = z.infer<typeof CreateProductSchema>;
+export type CreateProductType = z.infer<typeof CreateProductSchema>;
 
-export function Example() {
+export function Create({ navigation }: ApplicationTabScreenProps) {
 	const toast = useToast();
+
 	const {
 		control,
 		handleSubmit,
@@ -54,30 +61,34 @@ export function Example() {
 			barcode: '',
 			category: '',
 			type: 'product',
+			supplierName: '',
+			supplierContact: '',
+			createdAt: '',
+			updatedAt: '',
+			_id: '',
 		},
 	});
 
-	const [state] = useState<CreateProductInput>({
-		name: '',
-		description: '',
-		price: 0,
-		quantity: 0,
-		barcode: '',
-		category: '',
-		supplierId: '',
-		type: 'product',
-		createdAt: '',
-		updatedAt: '',
-		_id: '',
-	});
-
-	const handleCreateProduct = async () => {
-		const res = await createProduct({
-			...state,
+	const handleCreateProduct = async (data: CreateProductType) => {
+		const product: CreateProductInput = {
+			name: data.name,
+			description: data.description,
+			price: Number(data.price),
+			quantity: Number(data.quantity),
+			barcode: data.barcode,
+			category: data.category,
+			type: 'product',
+			supplier: {
+				type: 'supplier',
+				name: data.supplierName,
+				contact: data.supplierContact,
+			},
 			createdAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
 			_id: uuid.v4() as string,
-		});
+		};
+		const res = await createProduct(product);
+
 		toast.show({
 			render: () => (
 				<View>
@@ -89,9 +100,10 @@ export function Example() {
 
 	const onSubmit = (data: CreateProductType) => {
 		console.log('on Submit', data);
-		handleCreateProduct()
-			.then(() => {
-				console.log(data);
+		handleCreateProduct(data)
+			.then(res => {
+				console.log(res);
+				navigation.navigate('Home');
 			})
 			.catch(err => {
 				console.log(err);
@@ -99,15 +111,10 @@ export function Example() {
 	};
 
 	return (
-		<View padding="$4">
-			{/* <Heading size="md">General Information</Heading>
-			<Divider /> */}
-			<VStack mt="$2" space="md">
+		<ScrollView padding="$4">
+			<VStack space="md">
 				<Controller
 					control={control}
-					rules={{
-						required: true,
-					}}
 					render={({ field: { onChange, onBlur, value } }) => (
 						<FormControl
 							size="md"
@@ -147,9 +154,6 @@ export function Example() {
 
 				<Controller
 					control={control}
-					rules={{
-						required: true,
-					}}
 					render={({ field: { onChange, onBlur, value } }) => (
 						<FormControl
 							size="md"
@@ -189,9 +193,6 @@ export function Example() {
 
 				<Controller
 					control={control}
-					rules={{
-						required: true,
-					}}
 					render={({ field: { onChange, onBlur, value } }) => (
 						<FormControl
 							size="md"
@@ -227,9 +228,6 @@ export function Example() {
 
 				<Controller
 					control={control}
-					rules={{
-						required: true,
-					}}
 					render={({ field: { onChange, onBlur, value } }) => (
 						<FormControl
 							size="md"
@@ -263,6 +261,74 @@ export function Example() {
 					name="quantity"
 				/>
 
+				<Controller
+					control={control}
+					render={({ field: { onChange, onBlur, value } }) => (
+						<FormControl
+							size="md"
+							isDisabled={false}
+							isInvalid={errors.name ? true : false}
+							isReadOnly={false}
+							isRequired={false}
+						>
+							<FormControlLabel mb="$1">
+								<FormControlLabelText>Supplier Name</FormControlLabelText>
+							</FormControlLabel>
+							<Input>
+								<InputField
+									onBlur={onBlur}
+									onChangeText={onChange}
+									value={value}
+									placeholder="supplier name"
+								/>
+							</Input>
+							<FormControlError>
+								<FormControlErrorIcon as={AlertCircleIcon} />
+								{errors.supplierName && (
+									<FormControlErrorText>
+										{errors.supplierName.message}
+									</FormControlErrorText>
+								)}
+							</FormControlError>
+						</FormControl>
+					)}
+					name="supplierName"
+				/>
+
+				<Controller
+					control={control}
+					render={({ field: { onChange, onBlur, value } }) => (
+						<FormControl
+							size="md"
+							isDisabled={false}
+							isInvalid={errors.name ? true : false}
+							isReadOnly={false}
+							isRequired={false}
+						>
+							<FormControlLabel mb="$1">
+								<FormControlLabelText>Supplier Contact</FormControlLabelText>
+							</FormControlLabel>
+							<Input>
+								<InputField
+									onBlur={onBlur}
+									onChangeText={onChange}
+									value={value}
+									placeholder="supplier contact number"
+								/>
+							</Input>
+							<FormControlError>
+								<FormControlErrorIcon as={AlertCircleIcon} />
+								{errors.supplierContact && (
+									<FormControlErrorText>
+										{errors.supplierContact.message}
+									</FormControlErrorText>
+								)}
+							</FormControlError>
+						</FormControl>
+					)}
+					name="supplierContact"
+				/>
+
 				<Button
 					onPress={handleSubmit(onSubmit)}
 					width="$32"
@@ -272,8 +338,8 @@ export function Example() {
 					<ButtonText>Submit</ButtonText>
 				</Button>
 			</VStack>
-		</View>
+		</ScrollView>
 	);
 }
 
-export default Example;
+export default Create;
