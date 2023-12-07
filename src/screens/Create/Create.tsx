@@ -29,9 +29,19 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ApplicationTabScreenProps } from '@/types/navigation';
 import { launchImageLibrary } from 'react-native-image-picker';
-import { Camera, useCameraDevices } from 'react-native-vision-camera';
-import { useScanBarcodes, BarcodeFormat } from 'vision-camera-code-scanner';
-import { StyleSheet } from 'react-native';
+import {
+	Camera,
+	useCameraDevice,
+	useCameraPermission,
+	useCodeScanner,
+} from 'react-native-vision-camera';
+import { Linking, StyleSheet, Alert } from 'react-native';
+
+import {
+	formatWifiData,
+	getCountryFromBarcode,
+	openExternalLink,
+} from '@/utils';
 
 import { useState, useEffect } from 'react';
 
@@ -56,21 +66,84 @@ export function Create({ navigation }: ApplicationTabScreenProps) {
 	const toast = useToast();
 
 	const [images, setImages] = useState([]);
+	const [barcode, setBarcode] = useState('');
+	console.log(barcode);
 
-	const [hasPermission, setHasPermission] = useState(false);
-	const devices = useCameraDevices();
-	const device = devices.back;
+	const [torchOn, settorchOn] = useState(true);
 
-	const [frameProcessor, barcodes] = useScanBarcodes([BarcodeFormat.QR_CODE], {
-		checkInverted: true,
+	const [enableOnCodeScanned, setEnableOnCodeScanned] = useState(true);
+	const { requestPermission: requestCameraPermission } = useCameraPermission();
+	const device = useCameraDevice('back');
+
+	const showAlert = (value = '', countryOfOrigin = '', showMoreBtn = true) => {
+		Alert.alert(
+			value,
+			countryOfOrigin,
+			showMoreBtn
+				? [
+						{
+							text: 'Cancel',
+							onPress: () => console.log('Cancel Pressed'),
+							style: 'cancel',
+						},
+						{
+							text: 'More',
+							onPress: () => {
+								settorchOn(false);
+								setEnableOnCodeScanned(true);
+								void openExternalLink('https://www.barcodelookup.com/' + value);
+							},
+						},
+				  ]
+				: [
+						{
+							text: 'Cancel',
+							onPress: () => setEnableOnCodeScanned(true),
+							style: 'cancel',
+						},
+				  ],
+			{ cancelable: false },
+		);
+	};
+
+	const codeScanner = useCodeScanner({
+		codeTypes: ['qr', 'ean-13'],
+		onCodeScanned: codes => {
+			setBarcode(codes[0]?.value);
+			if (enableOnCodeScanned) {
+				const value = codes[0]?.value;
+				const type = codes[0]?.type;
+
+				console.log(codes[0]);
+				if (type === 'qr') {
+					openExternalLink(value).catch(error => {
+						console.log(error);
+						showAlert('Detail', formatWifiData(value), false);
+					});
+				} else {
+					// navigation.navigate('Detail', {value});
+					// openExternalLink('https://www.barcodelookup.com/' + value);
+					const countryOfOrigin = getCountryFromBarcode(value) as string;
+
+					console.log(`Country of Origin for ${value}: ${countryOfOrigin}`);
+					showAlert(value, countryOfOrigin);
+				}
+				setEnableOnCodeScanned(false);
+			}
+		},
 	});
 
-	useEffect(() => {
-		void (async () => {
-			const status = await Camera.requestCameraPermission();
-			setHasPermission(status === 'granted');
-		})();
-	}, []);
+	const handleCameraPermission = async () => {
+		const granted = await requestCameraPermission();
+
+		if (!granted) {
+			alert(
+				'Camera permission is required to use the camera. Please grant permission in your device settings.',
+			);
+			// Optionally, you can use Linking API to open the App Settings
+			void Linking.openSettings();
+		}
+	};
 
 	const {
 		control,
@@ -145,6 +218,10 @@ export function Create({ navigation }: ApplicationTabScreenProps) {
 		});
 		setImages(result.assets.map(asset => asset.uri));
 	};
+
+	useEffect(() => {
+		void handleCameraPermission();
+	}, []);
 
 	return (
 		<ScrollView padding="$4">
@@ -390,7 +467,7 @@ export function Create({ navigation }: ApplicationTabScreenProps) {
 				</Button>
 
 				<Button
-					onPress={handleImageAttachment}
+					onPress={() => settorchOn(!torchOn)}
 					width="$32"
 					size="sm"
 					variant="solid"
@@ -398,18 +475,16 @@ export function Create({ navigation }: ApplicationTabScreenProps) {
 					<ButtonText>Add Barcode</ButtonText>
 				</Button>
 
-				{device != null && hasPermission && (
+				{device != null && (
 					<>
 						<Camera
+							codeScanner={codeScanner}
 							style={StyleSheet.absoluteFill}
 							device={device}
 							isActive={true}
-							frameProcessor={frameProcessor}
-							frameProcessorFps={5}
+							torch={torchOn ? 'on' : 'off'}
+							onTouchEnd={() => setEnableOnCodeScanned(true)}
 						/>
-						{barcodes.map((barcode, idx) => (
-							<Text key={idx}>{barcode.displayValue}</Text>
-						))}
 					</>
 				)}
 
